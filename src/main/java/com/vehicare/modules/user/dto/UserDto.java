@@ -1,5 +1,7 @@
 package com.vehicare.modules.user.dto;
 
+import com.vehicare.modules.user.entity.Role;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,5 +20,6 @@ public class UserDto {
 	    private String phone;
 	    private String address;
 	    private String email;
+	    private  Role  role;
 
 }
