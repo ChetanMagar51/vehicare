@@ -1,11 +1,11 @@
 package com.vehicare.modules.vehicle.dto;
 
+import com.vehicare.modules.vehicle.entity.FuelType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import com.vehicare.modules.vehicle.entity.FuelType;
 
 @Data
 @Builder

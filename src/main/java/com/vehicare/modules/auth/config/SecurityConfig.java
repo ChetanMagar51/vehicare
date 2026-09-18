@@ -10,7 +10,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.vehicare.modules.auth.security.JwtAuthenticationFilter;
-import com.vehicare.modules.user.entity.Role;
 
 import lombok.RequiredArgsConstructor;
 

@@ -6,7 +6,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vehicare.common.api.ApiResponse;
 import com.vehicare.modules.user.dto.RegisterRequest;
 import com.vehicare.modules.user.dto.UserDto;
 import com.vehicare.modules.user.entity.Role;
@@ -20,12 +19,12 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImp implements UserService{
-	
+
 	private final UserRepository userRepository;
-	
+
 	private final PasswordEncoder passwordEncoder;
-	
-	
+
+
 	private UserDto mapToUserDto(User user) {
 
 		if (user == null) {
@@ -61,7 +60,7 @@ public class UserServiceImp implements UserService{
 
 	    return mapToUserDto(savedUser);
 	}
-	
+
 	@Override
 	@Transactional
 	public UserDto createUser(RegisterRequest request, Role role) {
@@ -86,7 +85,7 @@ public class UserServiceImp implements UserService{
 
 	    return mapToUserDto(savedUser);
 	}
-	
+
 	@Override
 	public UserDto getUserById(Long id) {
 		User user = userRepository.findById(id)
@@ -99,14 +98,14 @@ public class UserServiceImp implements UserService{
 
 	@Override
 	public List<UserDto> getAllUsers() {
-		
-		
+
+
 		return userRepository.findAll()
                 .stream()
                 .map(user->mapToUserDto(user))
                 .toList();
 	}
-	
+
 	@Override
 	public List<UserDto> getUsersByRole(Role role) {
 
@@ -115,7 +114,7 @@ public class UserServiceImp implements UserService{
 	            .map(this::mapToUserDto)
 	            .toList();
 	}
-	
+
 	@Override
 	@Transactional
 	public void deleteUser(Long id) {
@@ -128,8 +127,8 @@ public class UserServiceImp implements UserService{
 
 	    userRepository.delete(user);
 	}
-	
-	
+
+
 
 
 }

@@ -28,20 +28,20 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(response);
     }
-    
+
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleUserNotFoundException(UserNotFoundException ex)
     {
-    	  
-    	
+
+
     return	new ResponseEntity<>(ApiResponse.<Void>builder()
                 .message(ex.getMessage())
                 .status(HttpStatus.NOT_FOUND.name())
                 .build(), HttpStatus.NOT_FOUND);
-    	
+
     }
-    
-    
+
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<Void>> handleBadCredentials(
             BadCredentialsException ex) {
@@ -56,8 +56,8 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(response);
     }
-    
-    
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationException(
             MethodArgumentNotValidException ex) {

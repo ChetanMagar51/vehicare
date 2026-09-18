@@ -9,16 +9,16 @@ import com.vehicare.modules.user.entity.Role;
 import com.vehicare.modules.user.entity.User;
 
 public interface UserRepository extends JpaRepository<User,Long> {
-	
+
 	Optional<User> findByEmail(String email);
 
     Optional<User> findByRoleAndId(Role role, Long id);
 
     List<User> findAllByRole(Role role);
-    
+
     boolean existsByEmail(String email);
-    
-    
-    
+
+
+
 
 }

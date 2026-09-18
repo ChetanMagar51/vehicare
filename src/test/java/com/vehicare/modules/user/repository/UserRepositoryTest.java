@@ -14,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import com.vehicare.modules.user.entity.Role;
 import com.vehicare.modules.user.entity.User;
-import com.vehicare.modules.user.repository.UserRepository;
 
 @DataJpaTest
 class UserRepositoryTest {

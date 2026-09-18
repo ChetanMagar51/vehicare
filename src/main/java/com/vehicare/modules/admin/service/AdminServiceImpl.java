@@ -16,11 +16,11 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
-	
+
 
     private final UserService userService;
-    
-    
+
+
     @Override
     public UserDto createOwner(RegisterRequest request) {
         return userService.createUser(request, Role.Owner);
@@ -60,7 +60,7 @@ public class AdminServiceImpl implements AdminService {
     public void deleteUser(Long id) {
         userService.deleteUser(id);
     }
-    
-    
+
+
 
 }

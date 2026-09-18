@@ -40,7 +40,7 @@ public class VehicleServiceImpl implements VehicleService {
         	throw new VehicleRegistrationAlreadyExistsException(
         	        "Vehicle already exists with registration number: "
         	                + request.getRegistrationNumber());
-        	
+
         }
 
         // 3. Create vehicle

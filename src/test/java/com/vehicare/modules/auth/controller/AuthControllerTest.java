@@ -39,7 +39,7 @@ class AuthControllerTest {
     @MockBean
     private AuthService authService;
 
-    
+
     @MockBean
     private JwtService jwtService;
     // =========================================================
@@ -87,7 +87,7 @@ class AuthControllerTest {
         verify(authService)
                 .register(any(RegisterRequest.class));
     }
-    
+
     @Test
     void register_ShouldReturnBadRequest_WhenRequestIsInvalid() throws Exception {
 
@@ -110,8 +110,8 @@ class AuthControllerTest {
         verify(authService, never())
                 .register(any(RegisterRequest.class));
     }
-    
-    
+
+
     @Test
     void register_ShouldReturnConflict_WhenEmailAlreadyExists() throws Exception {
 
@@ -143,8 +143,8 @@ class AuthControllerTest {
         verify(authService)
                 .register(any(RegisterRequest.class));
     }
-    
-    
+
+
     //login
     @Test
     void login_ShouldReturnOk_WhenCredentialsAreValid() throws Exception {
@@ -179,8 +179,8 @@ class AuthControllerTest {
         verify(authService)
                 .login(any(LoginRequest.class));
     }
-    
-    
+
+
     @Test
     void login_ShouldReturnBadRequest_WhenRequestIsInvalid() throws Exception {
 
@@ -199,9 +199,9 @@ class AuthControllerTest {
         verify(authService, never())
                 .login(any(LoginRequest.class));
     }
-    
-    
-    
+
+
+
     @Test
     void login_ShouldReturnUnauthorized_WhenCredentialsAreInvalid() throws Exception {
 
@@ -227,5 +227,5 @@ class AuthControllerTest {
         verify(authService)
                 .login(any(LoginRequest.class));
     }
-    
+
 }

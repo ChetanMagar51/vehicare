@@ -59,7 +59,7 @@ public class AdminController {
 
         return ResponseEntity.noContent().build();
     }
-    
+
     @PostMapping("/owners")
     public ResponseEntity<ApiResponse<UserDto>> createOwner(
             @Valid @RequestBody RegisterRequest request) {
@@ -74,7 +74,7 @@ public class AdminController {
                         .data(user)
                         .build());
     }
-    
+
     @PostMapping("/service-advisors")
     public ResponseEntity<ApiResponse<UserDto>> createServiceAdvisor(
             @Valid @RequestBody RegisterRequest request) {
@@ -89,7 +89,7 @@ public class AdminController {
                         .data(user)
                         .build());
     }
-    
+
     @PostMapping("/sub-admins")
     public ResponseEntity<ApiResponse<UserDto>> createSubAdmin(
             @Valid @RequestBody RegisterRequest request) {

@@ -22,6 +22,6 @@ public interface AdminService {
     UserDto getUserById(Long id);
 
     void deleteUser(Long id);
-    
-    
+
+
 }
