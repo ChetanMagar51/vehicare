@@ -11,7 +11,7 @@ public interface SchedulingService {
 
 	List<AvailableSlotResponse> getAvailableSlots(Long serviceAdvisorId, LocalDate date);
 
-	void generateSlotsForAdvisor(Long serviceAdvisorId, YearMonth month);
+	void generateSlotsForAdvisor(Long serviceAdvisorId, LocalDate startDate, LocalDate endDate);
 
 	 void generateMonthlySlots(YearMonth month);
 }

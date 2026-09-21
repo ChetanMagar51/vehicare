@@ -24,13 +24,15 @@ import com.vehicare.modules.scheduling.entity.ServiceSlot;
 import com.vehicare.modules.scheduling.entity.ServiceSlotStatus;
 import com.vehicare.modules.scheduling.exception.InvalidSchedulingConfigurationException;
 import com.vehicare.modules.scheduling.exception.InvalidSlotException;
+import com.vehicare.modules.scheduling.exception.SchedulingException;
+import com.vehicare.modules.scheduling.exception.ServiceAdvisorAvailabilityNotFoundException;
+import com.vehicare.modules.scheduling.exception.ServiceAdvisorNotFoundException;
 import com.vehicare.modules.scheduling.exception.WorkingHoursNotConfiguredException;
 import com.vehicare.modules.scheduling.repository.ServiceAdvisorAvailabilityRepository;
 import com.vehicare.modules.scheduling.repository.ServiceCenterWorkingHoursRepository;
 import com.vehicare.modules.scheduling.repository.ServiceSlotRepository;
 import com.vehicare.modules.user.dto.UserDto;
 import com.vehicare.modules.user.entity.Role;
-import com.vehicare.modules.user.exception.UserNotFoundException;
 import com.vehicare.modules.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -49,18 +51,17 @@ public class SchedulingServiceImpl implements SchedulingService {
 
 	@Override
 	@Transactional
-	public void generateSlotsForAdvisor(Long serviceAdvisorId, YearMonth month) {
+	public void generateSlotsForAdvisor(Long serviceAdvisorId, LocalDate startDate, LocalDate endDate) {
 
 		// 1. Basic validation
 		validateAdvisorId(serviceAdvisorId);
-		validateMonth(month);
+		validateDates(startDate, endDate);
 		validateSlotDuration();
 
 		// 2. Validate that user is actually a Service Advisor
 		validateServiceAdvisor(serviceAdvisorId);
 
-		LocalDate startDate = month.atDay(1);
-		LocalDate endDate = month.atEndOfMonth();
+		
 
 		// 3. Load center working hours ONCE
 		Map<DayOfWeek, ServiceCenterWorkingHours> workingHoursMap = loadWorkingHours();
@@ -117,7 +118,7 @@ public class SchedulingServiceImpl implements SchedulingService {
 					continue;
 				}
 
-				validateAvailability(availability);
+				
 
 				// Find the common time between:
 				// Service Center working hours
@@ -214,6 +215,17 @@ public class SchedulingServiceImpl implements SchedulingService {
 
 		List<ServiceAdvisorAvailability> availabilities = advisorAvailabilityRepository
 				.findByServiceAdvisorId(serviceAdvisorId);
+		
+		if (availabilities.isEmpty()) {
+	        throw new ServiceAdvisorAvailabilityNotFoundException(
+	                "Service advisor availability is not configured");
+	    }
+		
+		 for (ServiceAdvisorAvailability availability : availabilities) {
+		        if (availability.getDayOfWeek() == null) {
+		            throw new InvalidSlotException("Day of week is required");
+		        }
+		    }
 
 		return availabilities.stream().collect(Collectors.groupingBy(ServiceAdvisorAvailability::getDayOfWeek));
 	}
@@ -227,7 +239,7 @@ public class SchedulingServiceImpl implements SchedulingService {
 		UserDto advisor = userService.getUserById(serviceAdvisorId);
 
 		if (!(advisor.getRole() == Role.Service_Adviser)) {
-			throw new UserNotFoundException("Service advisor not found");
+			throw new ServiceAdvisorNotFoundException("Service advisor not found");
 		}
 	}
 
@@ -242,11 +254,17 @@ public class SchedulingServiceImpl implements SchedulingService {
 		}
 	}
 
-	private void validateMonth(YearMonth month) {
-
-		if (month == null) {
-			throw new InvalidSchedulingConfigurationException("Month is required");
+	private void validateDates(LocalDate startDate, LocalDate endDate) {
+		
+		
+		if (startDate == null || endDate == null) {
+			throw new InvalidSchedulingConfigurationException("dates is required");
 		}
+		
+		if (startDate.isAfter(endDate)) {
+	        throw new InvalidSchedulingConfigurationException(
+	                "Start date must be before or equal to end date");
+	    }
 	}
 
 	private void validateSlotDuration() {
@@ -331,18 +349,6 @@ public class SchedulingServiceImpl implements SchedulingService {
 		}
 	}
 
-	private void validateAvailability(ServiceAdvisorAvailability availability) {
-
-		if (availability.getAvailableFrom() == null || availability.getAvailableTo() == null) {
-
-			throw new InvalidSlotException("Advisor availability time is required");
-		}
-
-		if (!availability.getAvailableFrom().isBefore(availability.getAvailableTo())) {
-
-			throw new InvalidSlotException("Advisor availableFrom must be before availableTo");
-		}
-	}
 
 	// --------------------------------------------------
 	// Check overlapping advisor availability
@@ -424,12 +430,41 @@ public class SchedulingServiceImpl implements SchedulingService {
     @Transactional
     public void generateMonthlySlots(YearMonth month) {
 
+		
+		
+		if (month == null) {
+	        throw new InvalidSchedulingConfigurationException(
+	                "Month is required");
+	    }
+		
+		
         List<Long> advisorIds =
                 userService .getUsersByRole(Role.Service_Adviser).stream().map(user->user.getId()).toList();
 
         for (Long advisorId : advisorIds) {
+        	
+        	LocalDate startDate = month.atDay(1);
+    		LocalDate endDate = month.atEndOfMonth();
 
-            generateSlotsForAdvisor(advisorId, month);
+    		 try {
+    	            generateSlotsForAdvisor(
+    	                    advisorId,
+    	                    startDate,
+    	                    endDate
+    	            );
+
+    	        } catch (SchedulingException ex) {
+
+    	            // One advisor's configuration problem
+    	            // should not stop other advisors.
+    	            // Log the error here.
+    	        	
+    	        	System.err.println("Failed to generate slots for service advisor {"+advisorId+"} "
+    	        			+ "for month {"+month+"}"+ex);
+      	        	     
+    	        	
+    	        	
+    	        }
 
 
         }
