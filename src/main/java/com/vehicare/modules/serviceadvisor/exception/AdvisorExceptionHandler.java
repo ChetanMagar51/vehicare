@@ -6,11 +6,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.vehicare.common.api.ApiResponse;
-import com.vehicare.modules.user.exception.UserNotFoundException;
 
 @RestControllerAdvice
 public class AdvisorExceptionHandler {
-	
+
 	@ExceptionHandler(ServiceAdvisorProfileAlreadyExistsException.class)
 	public ResponseEntity<ApiResponse<Void>> profileAlreadyExistsException(ServiceAdvisorProfileAlreadyExistsException ex)
 	{
@@ -24,8 +23,8 @@ public class AdvisorExceptionHandler {
 	                .status(HttpStatus.CONFLICT)
 	                .body(response);
 	}
-	
-	
+
+
 	@ExceptionHandler(ServiceAdvisorProfileNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleUserNotFoundException(ServiceAdvisorProfileNotFoundException ex)
     {
@@ -37,6 +36,6 @@ public class AdvisorExceptionHandler {
                 .build(), HttpStatus.NOT_FOUND);
 
     }
-	
+
 
 }

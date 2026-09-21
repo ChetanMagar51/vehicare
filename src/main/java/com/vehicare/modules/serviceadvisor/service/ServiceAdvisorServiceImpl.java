@@ -3,8 +3,6 @@ package com.vehicare.modules.serviceadvisor.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
-
 import com.vehicare.modules.serviceadvisor.api.ServiceAdvisorService;
 import com.vehicare.modules.serviceadvisor.dto.ServiceAdvisorCreateRequest;
 import com.vehicare.modules.serviceadvisor.dto.ServiceAdvisorResponse;
@@ -13,6 +11,8 @@ import com.vehicare.modules.serviceadvisor.entity.ServiceAdvisorProfile;
 import com.vehicare.modules.serviceadvisor.exception.ServiceAdvisorProfileAlreadyExistsException;
 import com.vehicare.modules.serviceadvisor.exception.ServiceAdvisorProfileNotFoundException;
 import com.vehicare.modules.serviceadvisor.repository.ServiceAdvisorProfileRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

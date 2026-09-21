@@ -3,7 +3,6 @@ package com.vehicare.modules.appointment.dto;
 import com.vehicare.modules.appointment.entity.AppointmentStatus;
 
 import jakarta.validation.constraints.NotNull;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

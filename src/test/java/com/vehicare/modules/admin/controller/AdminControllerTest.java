@@ -38,7 +38,7 @@ class AdminControllerTest {
 
     @MockBean
     private AdminService adminService;
-    
+
 
     @MockBean
     private JwtService jwtService;
