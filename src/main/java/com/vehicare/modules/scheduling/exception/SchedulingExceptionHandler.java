@@ -45,4 +45,34 @@ public class SchedulingExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 	}
+	
+	@ExceptionHandler(InvalidSchedulingConfigurationException.class)
+	public ResponseEntity<ApiResponse<Void>> handleInvalidSchedulingConfiguration(
+	        InvalidSchedulingConfigurationException ex) {
+
+	    ApiResponse<Void> response = ApiResponse.<Void>builder()
+	            .status("ERROR")
+	            .message(ex.getMessage())
+	            .data(null)
+	            .build();
+
+	    return ResponseEntity
+	            .status(HttpStatus.BAD_REQUEST)
+	            .body(response);
+	}
+	
+	@ExceptionHandler(ServiceAdvisorNotFoundException.class)
+	public ResponseEntity<ApiResponse<Void>> handleServiceAdvisorNotFound(
+	        ServiceAdvisorNotFoundException ex) {
+
+	    ApiResponse<Void> response = ApiResponse.<Void>builder()
+	            .status("ERROR")
+	            .message(ex.getMessage())
+	            .data(null)
+	            .build();
+
+	    return ResponseEntity
+	            .status(HttpStatus.NOT_FOUND)
+	            .body(response);
+	}
 }
