@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +50,9 @@ public class SchedulingServiceImpl implements SchedulingService {
 
 	@Value("${scheduling.slot-duration-minutes}")
 	private Integer slotDurationMinutes;
+	
+	private static final Logger log =
+	        LoggerFactory.getLogger(SchedulingServiceImpl.class);
 
 	@Override
 	@Transactional
@@ -217,7 +222,7 @@ public class SchedulingServiceImpl implements SchedulingService {
 				.findByServiceAdvisorId(serviceAdvisorId);
 		
 		if (availabilities.isEmpty()) {
-	        throw new ServiceAdvisorAvailabilityNotFoundException(
+	        throw new InvalidSlotException(
 	                "Service advisor availability is not configured");
 	    }
 		
@@ -454,16 +459,12 @@ public class SchedulingServiceImpl implements SchedulingService {
     	            );
 
     	        } catch (SchedulingException ex) {
-
-    	            // One advisor's configuration problem
-    	            // should not stop other advisors.
-    	            // Log the error here.
-    	        	
-    	        	System.err.println("Failed to generate slots for service advisor {"+advisorId+"} "
-    	        			+ "for month {"+month+"}"+ex);
-      	        	     
-    	        	
-    	        	
+    	            log.error(
+    	                    "Failed to generate slots for service advisor {} for month {}",
+    	                    advisorId,
+    	                    month,
+    	                    ex
+    	            );
     	        }
 
 
