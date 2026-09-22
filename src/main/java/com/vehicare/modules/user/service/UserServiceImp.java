@@ -18,12 +18,11 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImp implements UserService{
+public class UserServiceImp implements UserService {
 
 	private final UserRepository userRepository;
 
 	private final PasswordEncoder passwordEncoder;
-
 
 	private UserDto mapToUserDto(User user) {
 
@@ -32,103 +31,61 @@ public class UserServiceImp implements UserService{
 		}
 
 		return UserDto.builder().id(user.getId()).firstName(user.getFirstName()).lastName(user.getLastName())
-				.email(user.getEmail()).phone(user.getPhone()).address(user.getAddress()).build();
+				.role(user.getRole()).email(user.getEmail()).phone(user.getPhone()).address(user.getAddress()).build();
 	}
 
 	// Service
 	@Override
-	@Transactional
 	public UserDto createUser(RegisterRequest request) {
 
-	    if (userRepository.existsByEmail(request.getEmail())) {
-	        throw new EmailAlreadyExistsException(
-	                "User already exists with email: " + request.getEmail()
-	        );
-	    }
-
-	    User user = User.builder()
-	            .firstName(request.getFirstName())
-	            .lastName(request.getLastName())
-	            .phone(request.getPhone())
-	            .address(request.getAddress())
-	            .email(request.getEmail())
-	            .password(passwordEncoder.encode(request.getPassword()))
-	            .role(Role.Owner)
-	            .build();
-
-	    User savedUser = userRepository.save(user);
-
-	    return mapToUserDto(savedUser);
+		return createUser(request, Role.Owner);
 	}
 
 	@Override
 	@Transactional
 	public UserDto createUser(RegisterRequest request, Role role) {
 
-	    if (userRepository.existsByEmail(request.getEmail())) {
-	        throw new EmailAlreadyExistsException(
-	                "User already exists with email: " + request.getEmail()
-	        );
-	    }
+		if (userRepository.existsByEmail(request.getEmail())) {
+			throw new EmailAlreadyExistsException("User already exists with email: " + request.getEmail());
+		}
 
-	    User user = User.builder()
-	            .firstName(request.getFirstName())
-	            .lastName(request.getLastName())
-	            .phone(request.getPhone())
-	            .address(request.getAddress())
-	            .email(request.getEmail())
-	            .password(passwordEncoder.encode(request.getPassword()))
-	            .role(role)
-	            .build();
+		User user = User.builder().firstName(request.getFirstName()).lastName(request.getLastName())
+				.phone(request.getPhone()).address(request.getAddress()).email(request.getEmail())
+				.password(passwordEncoder.encode(request.getPassword())).role(role).build();
 
-	    User savedUser = userRepository.save(user);
+		User savedUser = userRepository.save(user);
 
-	    return mapToUserDto(savedUser);
+		return mapToUserDto(savedUser);
 	}
 
 	@Override
 	public UserDto getUserById(Long id) {
 		User user = userRepository.findById(id)
-	            .orElseThrow(() -> new UserNotFoundException(
-	                    "User not found with id: " + id
-	            ));
+				.orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
 
-	    return mapToUserDto(user);
+		return mapToUserDto(user);
 	}
 
 	@Override
 	public List<UserDto> getAllUsers() {
 
-
-		return userRepository.findAll()
-                .stream()
-                .map(user->mapToUserDto(user))
-                .toList();
+		return userRepository.findAll().stream().map(user -> mapToUserDto(user)).toList();
 	}
 
 	@Override
 	public List<UserDto> getUsersByRole(Role role) {
 
-	    return userRepository.findAllByRole(role)
-	            .stream()
-	            .map(this::mapToUserDto)
-	            .toList();
+		return userRepository.findAllByRole(role).stream().map(this::mapToUserDto).toList();
 	}
 
 	@Override
 	@Transactional
 	public void deleteUser(Long id) {
 
-	    User user = userRepository.findById(id)
-	            .orElseThrow(() ->
-	                    new UserNotFoundException(
-	                            "User not found with id: " + id
-	                    ));
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
 
-	    userRepository.delete(user);
+		userRepository.delete(user);
 	}
-
-
-
 
 }
