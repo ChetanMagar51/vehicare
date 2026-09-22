@@ -26,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException, java.io.IOException {
+			throws ServletException, IOException {
 
 		String authHeader = request.getHeader("Authorization");
 
@@ -56,6 +56,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				}
 			}
 		} catch (JwtException | IllegalArgumentException exception) {
+			
+//			 exception.printStackTrace();
 
 			SecurityContextHolder.clearContext();
 		}
