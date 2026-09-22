@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vehicare.modules.user.dto.RegisterRequest;
+import com.vehicare.modules.user.dto.UpdateUserRequest;
 import com.vehicare.modules.user.dto.UserDto;
 import com.vehicare.modules.user.entity.Role;
 import com.vehicare.modules.user.entity.User;
@@ -65,6 +66,16 @@ public class UserServiceImp implements UserService {
 
 		return mapToUserDto(user);
 	}
+    
+	@Override
+	public UserDto getUserByEmail(String email) {
+		
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+
+		return mapToUserDto(user);
+	}
+	
 
 	@Override
 	public List<UserDto> getAllUsers() {
@@ -77,6 +88,46 @@ public class UserServiceImp implements UserService {
 
 		return userRepository.findAllByRole(role).stream().map(this::mapToUserDto).toList();
 	}
+	
+	@Override
+	@Transactional
+	public void enableUser(Long id)
+	{
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+		
+		user.setEnabled(true);
+
+		
+	}
+	
+	@Override
+	@Transactional
+	public void disableUser(Long id)
+	{
+		User user = userRepository.findById(id)
+				.orElseThrow(()-> new UserNotFoundException("User not found with id: " + id));
+				
+				user.setEnabled(false);
+		
+	}
+	
+	@Override
+	@Transactional
+	public UserDto updateUser(Long id, UpdateUserRequest request) {
+
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+		user.setFirstName(request.getFirstName());
+		user.setLastName(request.getLastName());
+		user.setPhone(request.getPhone());
+		user.setAddress(request.getAddress());
+
+		User updatedUser = userRepository.save(user);
+
+		return mapToUserDto(updatedUser);
+	}
 
 	@Override
 	@Transactional
@@ -87,5 +138,9 @@ public class UserServiceImp implements UserService {
 
 		userRepository.delete(user);
 	}
+
+	
+	
+	
 
 }
