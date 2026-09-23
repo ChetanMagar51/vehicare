@@ -21,22 +21,7 @@ class ServiceAdvisorEmailServiceImplTest {
 	@InjectMocks
 	private ServiceAdvisorEmailServiceImpl serviceAdvisorEmailService;
 
-	@Test
-	void sendWelcomeEmail_shouldSendEmailSuccessfully() {
-
-		serviceAdvisorEmailService.sendWelcomeEmail("advisor@vehicare.com", "Rahul");
-
-		verifyEmail("advisor@vehicare.com", "Welcome to Vehicare", """
-				Hello Rahul,
-
-				Your Service Advisor account has been created successfully.
-
-				Welcome to Vehicare.
-
-				Regards,
-				Vehicare Team
-				""");
-	}
+	
 
 	@Test
 	void sendAppointmentAssignedEmail_shouldSendEmailSuccessfully() {

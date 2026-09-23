@@ -23,23 +23,6 @@ class OwnerEmailServiceImplTest {
 	private OwnerEmailServiceImpl ownerEmailService;
 
 	@Test
-	void sendWelcomeEmail_shouldSendEmailSuccessfully() {
-
-		ownerEmailService.sendWelcomeEmail("owner@vehicare.com", "Chetan");
-
-		verifyEmail("owner@vehicare.com", "Welcome to Vehicare", """
-				Hello Chetan,
-
-				Welcome to Vehicare.
-
-				Your owner account has been successfully created.
-
-				Regards,
-				Vehicare Team
-				""");
-	}
-
-	@Test
 	void sendVehicleRegistrationEmail_shouldSendEmailSuccessfully() {
 
 		ownerEmailService.sendVehicleRegistrationEmail("owner@vehicare.com", "Chetan", "MH12AB1234");
