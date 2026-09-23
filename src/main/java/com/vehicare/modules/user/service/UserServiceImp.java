@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vehicare.modules.email.api.UserEmailService;
 import com.vehicare.modules.user.dto.RegisterRequest;
 import com.vehicare.modules.user.dto.UpdateUserRequest;
 import com.vehicare.modules.user.dto.UserDto;
@@ -24,6 +25,8 @@ public class UserServiceImp implements UserService {
 	private final UserRepository userRepository;
 
 	private final PasswordEncoder passwordEncoder;
+	
+	private final UserEmailService userEmailservice;
 
 	private UserDto mapToUserDto(User user) {
 
@@ -55,6 +58,8 @@ public class UserServiceImp implements UserService {
 				.password(passwordEncoder.encode(request.getPassword())).role(role).build();
 
 		User savedUser = userRepository.save(user);
+		
+		userEmailservice.sendWelcomeEmail(savedUser.getEmail(), savedUser.getUsername(), savedUser.getRole());
 
 		return mapToUserDto(savedUser);
 	}
@@ -97,6 +102,8 @@ public class UserServiceImp implements UserService {
 				.orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
 		
 		user.setEnabled(true);
+		
+		userEmailservice.sendAccountEnabledEmail(user.getEmail(), user.getUsername());
 
 		
 	}
@@ -109,6 +116,7 @@ public class UserServiceImp implements UserService {
 				.orElseThrow(()-> new UserNotFoundException("User not found with id: " + id));
 				
 				user.setEnabled(false);
+				userEmailservice.sendAccountDisabledEmail(user.getEmail(), user.getUsername());
 		
 	}
 	
@@ -125,6 +133,8 @@ public class UserServiceImp implements UserService {
 		user.setAddress(request.getAddress());
 
 		User updatedUser = userRepository.save(user);
+		
+	
 
 		return mapToUserDto(updatedUser);
 	}
