@@ -13,24 +13,7 @@ public class ServiceAdvisorEmailServiceImpl implements ServiceAdvisorEmailServic
 
 	private final EmailService emailService;
 
-	@Override
-	public void sendWelcomeEmail(String advisorEmail, String advisorName) {
-
-		String subject = "Welcome to Vehicare";
-
-		String body = """
-				Hello %s,
-
-				Your Service Advisor account has been created successfully.
-
-				Welcome to Vehicare.
-
-				Regards,
-				Vehicare Team
-				""".formatted(advisorName);
-
-		emailService.sendEmail(advisorEmail, subject, body);
-	}
+	
 
 	@Override
 	public void sendAppointmentAssignedEmail(String advisorEmail, String advisorName, String appointmentDate,

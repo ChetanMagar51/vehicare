@@ -13,25 +13,7 @@ public class OwnerEmailServiceImpl implements OwnerEmailService {
 
 	private final EmailService emailService;
 
-	@Override
-	public void sendWelcomeEmail(String ownerEmail, String ownerName) {
-
-		String subject = "Welcome to Vehicare";
-
-		String body = """
-				Hello %s,
-
-				Welcome to Vehicare.
-
-				Your owner account has been successfully created.
-
-				Regards,
-				Vehicare Team
-				""".formatted(ownerName);
-
-		emailService.sendEmail(ownerEmail, subject, body);
-	}
-
+	
 	@Override
 	public void sendVehicleRegistrationEmail(String ownerEmail, String ownerName, String vehicleNumber) {
 

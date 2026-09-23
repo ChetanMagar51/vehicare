@@ -2,7 +2,6 @@ package com.vehicare.modules.email.api;
 
 public interface OwnerEmailService {
 
-	void sendWelcomeEmail(String ownerEmail, String ownerName);
 
 	void sendVehicleRegistrationEmail(String ownerEmail, String ownerName, String vehicleNumber);
 
