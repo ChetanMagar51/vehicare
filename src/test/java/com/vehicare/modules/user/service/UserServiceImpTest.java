@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -23,7 +24,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.vehicare.modules.email.api.UserEmailService;
 import com.vehicare.modules.user.dto.RegisterRequest;
+import com.vehicare.modules.user.dto.UpdateUserRequest;
 import com.vehicare.modules.user.dto.UserDto;
 import com.vehicare.modules.user.entity.Role;
 import com.vehicare.modules.user.entity.User;
@@ -31,367 +34,436 @@ import com.vehicare.modules.user.exception.EmailAlreadyExistsException;
 import com.vehicare.modules.user.exception.UserNotFoundException;
 import com.vehicare.modules.user.repository.UserRepository;
 
- @ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 class UserServiceImpTest {
 
-    @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @InjectMocks
-    private UserServiceImp userService;
-
-    private RegisterRequest registerRequest;
-    private User user;
-    private User savedUser;
-
-    @BeforeEach
-    void setUp() {
-
-        registerRequest = RegisterRequest.builder()
-                .firstName("Chetan")
-                .lastName("Magar")
-                .phone("9876543210")
-                .address("Pune")
-                .email("chetan@gmail.com")
-                .password("password123")
-                .build();
-
-        user = User.builder()
-                .id(1L)
-                .firstName("Chetan")
-                .lastName("Magar")
-                .phone("9876543210")
-                .address("Pune")
-                .email("chetan@gmail.com")
-                .password("encodedPassword")
-                .role(Role.Owner)
-                .build();
-
-        savedUser = User.builder()
-                .id(1L)
-                .firstName("Chetan")
-                .lastName("Magar")
-                .phone("9876543210")
-                .address("Pune")
-                .email("chetan@gmail.com")
-                .password("encodedPassword")
-                .role(Role.Owner)
-                .build();
-    }
-
-    // =========================================================
-    // createUser(RegisterRequest request)
-    // =========================================================
-
-    @Test
-    void createUser_ShouldCreateUserSuccessfully() {
-
-        when(userRepository.existsByEmail(registerRequest.getEmail()))
-                .thenReturn(false);
-
-        when(passwordEncoder.encode(registerRequest.getPassword()))
-                .thenReturn("encodedPassword");
+	@Mock
+	private UserRepository userRepository;
 
-        when(userRepository.save(any(User.class)))
-                .thenReturn(savedUser);
-
-        UserDto result = userService.createUser(registerRequest);
-
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("Chetan", result.getFirstName());
-        assertEquals("Magar", result.getLastName());
-        assertEquals("chetan@gmail.com", result.getEmail());
-        assertEquals("9876543210", result.getPhone());
-        assertEquals("Pune", result.getAddress());
-
-        verify(userRepository, times(1))
-                .existsByEmail(registerRequest.getEmail());
+	@Mock
+	private PasswordEncoder passwordEncoder;
 
-        verify(passwordEncoder, times(1))
-                .encode(registerRequest.getPassword());
+	@Mock
+	private UserEmailService userEmailService;
 
-        verify(userRepository, times(1))
-                .save(any(User.class));
-    }
+	@InjectMocks
+	private UserServiceImp userService;
 
-    @Test
-    void createUser_ShouldThrowException_WhenEmailAlreadyExists() {
+	private RegisterRequest registerRequest;
+	private User user;
+	private User savedUser;
 
-        when(userRepository.existsByEmail(registerRequest.getEmail()))
-                .thenReturn(true);
+	@BeforeEach
+	void setUp() {
 
-        assertThrows(
-                EmailAlreadyExistsException.class,
-                () -> userService.createUser(registerRequest)
-        );
+		registerRequest = RegisterRequest.builder().firstName("Chetan").lastName("Magar").phone("9876543210")
+				.address("Pune").email("chetan@gmail.com").password("password123").build();
 
-        verify(userRepository, times(1))
-                .existsByEmail(registerRequest.getEmail());
+		user = User.builder().id(1L).firstName("Chetan").lastName("Magar").phone("9876543210").address("Pune")
+				.email("chetan@gmail.com").password("encodedPassword").role(Role.Owner).build();
 
-        verify(userRepository, never())
-                .save(any(User.class));
+		savedUser = User.builder().id(1L).firstName("Chetan").lastName("Magar").phone("9876543210").address("Pune")
+				.email("chetan@gmail.com").password("encodedPassword").role(Role.Owner).build();
+	}
 
-        verify(passwordEncoder, never())
-                .encode(any(String.class));
-    }
+	// =========================================================
+	// createUser(RegisterRequest request)
+	// =========================================================
 
+	@Test
+	void createUser_ShouldCreateUserSuccessfully() {
 
-    // =========================================================
-    // createUser(RegisterRequest request, Role role)
-    // =========================================================
+		when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(false);
 
-    @Test
-    void createUserWithRole_ShouldCreateUserSuccessfully() {
+		when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
 
-        Role role = Role.Service_Adviser;
+		when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
-        when(userRepository.existsByEmail(registerRequest.getEmail()))
-                .thenReturn(false);
+		UserDto result = userService.createUser(registerRequest);
 
-        when(passwordEncoder.encode(registerRequest.getPassword()))
-                .thenReturn("encodedPassword");
+		assertNotNull(result);
+		assertEquals(1L, result.getId());
+		assertEquals("Chetan", result.getFirstName());
+		assertEquals("Magar", result.getLastName());
+		assertEquals("chetan@gmail.com", result.getEmail());
+		assertEquals("9876543210", result.getPhone());
+		assertEquals("Pune", result.getAddress());
+		assertEquals(Role.Owner, result.getRole());
 
-        User serviceAdvisor = User.builder()
-                .id(2L)
-                .firstName("Chetan")
-                .lastName("Magar")
-                .phone("9876543210")
-                .address("Pune")
-                .email("chetan@gmail.com")
-                .password("encodedPassword")
-                .role(role)
-                .build();
+		verify(userRepository, times(1)).existsByEmail(registerRequest.getEmail());
 
-        when(userRepository.save(any(User.class)))
-                .thenReturn(serviceAdvisor);
+		verify(passwordEncoder, times(1)).encode(registerRequest.getPassword());
 
-        UserDto result = userService.createUser(registerRequest, role);
+		verify(userRepository, times(1)).save(any(User.class));
 
-        assertNotNull(result);
-        assertEquals(2L, result.getId());
-        assertEquals("Chetan", result.getFirstName());
-        assertEquals("chetan@gmail.com", result.getEmail());
+		verify(userEmailService).sendWelcomeEmail(result.getEmail(), result.getFirstName(), Role.Owner);
+	}
 
-        verify(userRepository, times(1))
-                .existsByEmail(registerRequest.getEmail());
+	// =========================================================
+	// createUser(RegisterRequest request, Role role)
+	// =========================================================
 
-        verify(passwordEncoder, times(1))
-                .encode(registerRequest.getPassword());
+	@Test
+	void createUserWithRole_ShouldCreateUserSuccessfully() {
 
-        verify(userRepository, times(1))
-                .save(any(User.class));
-    }
+		Role role = Role.Service_Adviser;
 
-    @Test
-    void createUserWithRole_ShouldThrowException_WhenEmailAlreadyExists() {
+		when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(false);
 
-        Role role = Role.Service_Adviser;
+		when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
 
-        when(userRepository.existsByEmail(registerRequest.getEmail()))
-                .thenReturn(true);
+		User serviceAdvisor = User.builder().id(2L).firstName("Chetan").lastName("Magar").phone("9876543210")
+				.address("Pune").email("chetan@gmail.com").password("encodedPassword").role(role).build();
 
-        assertThrows(
-                EmailAlreadyExistsException.class,
-                () -> userService.createUser(registerRequest, role)
-        );
+		when(userRepository.save(any(User.class))).thenReturn(serviceAdvisor);
 
-        verify(userRepository, times(1))
-                .existsByEmail(registerRequest.getEmail());
+		UserDto result = userService.createUser(registerRequest, role);
 
-        verify(userRepository, never())
-                .save(any(User.class));
+		assertNotNull(result);
+		assertEquals(2L, result.getId());
+		assertEquals("Chetan", result.getFirstName());
+		assertEquals("chetan@gmail.com", result.getEmail());
 
-        verify(passwordEncoder, never())
-                .encode(any(String.class));
-    }
+		verify(userRepository, times(1)).existsByEmail(registerRequest.getEmail());
 
+		verify(passwordEncoder, times(1)).encode(registerRequest.getPassword());
 
-    // =========================================================
-    // getUserById(Long id)
-    // =========================================================
+		verify(userRepository, times(1)).save(any(User.class));
 
-    @Test
-    void getUserById_ShouldReturnUser_WhenUserExists() {
+		verify(userEmailService).sendWelcomeEmail(serviceAdvisor.getEmail(), serviceAdvisor.getFirstName(),
+				serviceAdvisor.getRole());
 
-        Long id = 1L;
+	}
 
-        when(userRepository.findById(id))
-                .thenReturn(Optional.of(user));
+	@Test
+	void createUserWithRole_ShouldThrowException_WhenRoleIsNull() {
 
-        UserDto result = userService.getUserById(id);
+		assertThrows(IllegalArgumentException.class, () -> userService.createUser(registerRequest, null));
 
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("Chetan", result.getFirstName());
-        assertEquals("Magar", result.getLastName());
-        assertEquals("chetan@gmail.com", result.getEmail());
+		verifyNoInteractions(userRepository);
+		verifyNoInteractions(userEmailService);
+	}
 
-        verify(userRepository, times(1))
-                .findById(id);
-    }
+	@Test
+	void createUserWithRole_ShouldThrowException_WhenEmailAlreadyExists() {
 
-    @Test
-    void getUserById_ShouldThrowException_WhenUserDoesNotExist() {
+		Role role = Role.Service_Adviser;
 
-        Long id = 100L;
+		when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(true);
 
-        when(userRepository.findById(id))
-                .thenReturn(Optional.empty());
+		assertThrows(EmailAlreadyExistsException.class, () -> userService.createUser(registerRequest, role));
 
-        assertThrows(
-                UserNotFoundException.class,
-                () -> userService.getUserById(id)
-        );
+		verify(userRepository, times(1)).existsByEmail(registerRequest.getEmail());
 
-        verify(userRepository, times(1))
-                .findById(id);
-    }
+		verify(userRepository, never()).save(any(User.class));
 
+		verify(passwordEncoder, never()).encode(any(String.class));
 
-    // =========================================================
-    // getAllUsers()
-    // =========================================================
+		verifyNoInteractions(userEmailService);
+	}
 
-    @Test
-    void getAllUsers_ShouldReturnAllUsers() {
+	// =========================================================
+	// getUserById(Long id)
+	// =========================================================
 
-        User user2 = User.builder()
-                .id(2L)
-                .firstName("Rahul")
-                .lastName("Patil")
-                .phone("9999999999")
-                .address("Pune")
-                .email("rahul@gmail.com")
-                .password("encoded")
-                .role(Role.Owner)
-                .build();
+	@Test
+	void getUserById_ShouldReturnUser_WhenUserExists() {
 
-        when(userRepository.findAll())
-                .thenReturn(Arrays.asList(user, user2));
+		Long id = 1L;
 
-        List<UserDto> result = userService.getAllUsers();
+		when(userRepository.findById(id)).thenReturn(Optional.of(user));
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
+		UserDto result = userService.getUserById(id);
 
-        assertEquals("Chetan", result.get(0).getFirstName());
-        assertEquals("Rahul", result.get(1).getFirstName());
+		assertNotNull(result);
+		assertEquals(1L, result.getId());
+		assertEquals("Chetan", result.getFirstName());
+		assertEquals("Magar", result.getLastName());
+		assertEquals("chetan@gmail.com", result.getEmail());
 
-        verify(userRepository, times(1))
-                .findAll();
-    }
+		verify(userRepository, times(1)).findById(id);
+	}
 
-    @Test
-    void getAllUsers_ShouldReturnEmptyList_WhenNoUsersExist() {
+	@Test
+	void getUserById_ShouldThrowException_WhenUserDoesNotExist() {
 
-        when(userRepository.findAll())
-                .thenReturn(Collections.emptyList());
+		Long id = 100L;
 
-        List<UserDto> result = userService.getAllUsers();
+		when(userRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertNotNull(result);
-        assertEquals(0, result.size());
+		assertThrows(UserNotFoundException.class, () -> userService.getUserById(id));
 
-        verify(userRepository, times(1))
-                .findAll();
-    }
+		verify(userRepository, times(1)).findById(id);
+	}
 
+	// =========================================================
+	// getAllUsers()
+	// =========================================================
 
-    // =========================================================
-    // getUsersByRole(Role role)
-    // =========================================================
+	@Test
+	void getAllUsers_ShouldReturnAllUsers() {
 
-    @Test
-    void getUsersByRole_ShouldReturnUsersWithGivenRole() {
+		User user2 = User.builder().id(2L).firstName("Rahul").lastName("Patil").phone("9999999999").address("Pune")
+				.email("rahul@gmail.com").password("encoded").role(Role.Owner).build();
 
-        Role role = Role.Owner;
+		when(userRepository.findAll()).thenReturn(Arrays.asList(user, user2));
 
-        User owner2 = User.builder()
-                .id(2L)
-                .firstName("Rahul")
-                .lastName("Patil")
-                .phone("9999999999")
-                .address("Pune")
-                .email("rahul@gmail.com")
-                .password("encoded")
-                .role(Role.Owner)
-                .build();
+		List<UserDto> result = userService.getAllUsers();
 
-        when(userRepository.findAllByRole(role))
-                .thenReturn(Arrays.asList(user, owner2));
+		assertNotNull(result);
+		assertEquals(2, result.size());
 
-        List<UserDto> result = userService.getUsersByRole(role);
+		assertEquals("Chetan", result.get(0).getFirstName());
+		assertEquals("Rahul", result.get(1).getFirstName());
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
+		verify(userRepository, times(1)).findAll();
+	}
 
-        assertEquals("Chetan", result.get(0).getFirstName());
-        assertEquals("Rahul", result.get(1).getFirstName());
+	@Test
+	void getAllUsers_ShouldReturnEmptyList_WhenNoUsersExist() {
 
-        verify(userRepository, times(1))
-                .findAllByRole(role);
-    }
+		when(userRepository.findAll()).thenReturn(Collections.emptyList());
 
-    @Test
-    void getUsersByRole_ShouldReturnEmptyList_WhenNoUsersWithRoleExist() {
+		List<UserDto> result = userService.getAllUsers();
 
-        Role role = Role.Service_Adviser;
+		assertNotNull(result);
+		assertEquals(0, result.size());
 
-        when(userRepository.findAllByRole(role))
-                .thenReturn(Collections.emptyList());
+		verify(userRepository, times(1)).findAll();
+	}
 
-        List<UserDto> result = userService.getUsersByRole(role);
+	// =========================================================
+	// getUsersByRole(Role role)
+	// =========================================================
 
-        assertNotNull(result);
-        assertEquals(0, result.size());
+	@Test
+	void getUsersByRole_ShouldReturnUsersWithGivenRole() {
 
-        verify(userRepository, times(1))
-                .findAllByRole(role);
-    }
+		Role role = Role.Owner;
 
+		User owner2 = User.builder().id(2L).firstName("Rahul").lastName("Patil").phone("9999999999").address("Pune")
+				.email("rahul@gmail.com").password("encoded").role(Role.Owner).build();
 
-    // =========================================================
-    // deleteUser(Long id)
-    // =========================================================
+		when(userRepository.findAllByRole(role)).thenReturn(Arrays.asList(user, owner2));
 
-    @Test
-    void deleteUser_ShouldDeleteUser_WhenUserExists() {
+		List<UserDto> result = userService.getUsersByRole(role);
 
-        Long id = 1L;
+		assertNotNull(result);
+		assertEquals(2, result.size());
 
-        when(userRepository.findById(id))
-                .thenReturn(Optional.of(user));
+		assertEquals("Chetan", result.get(0).getFirstName());
+		assertEquals("Rahul", result.get(1).getFirstName());
 
-        userService.deleteUser(id);
+		verify(userRepository, times(1)).findAllByRole(role);
+	}
 
-        verify(userRepository, times(1))
-                .findById(id);
+	@Test
+	void getUsersByRole_ShouldReturnEmptyList_WhenNoUsersWithRoleExist() {
 
-        verify(userRepository, times(1))
-                .delete(user);
-    }
+		Role role = Role.Service_Adviser;
 
-    @Test
-    void deleteUser_ShouldThrowException_WhenUserDoesNotExist() {
+		when(userRepository.findAllByRole(role)).thenReturn(Collections.emptyList());
 
-        Long id = 100L;
+		List<UserDto> result = userService.getUsersByRole(role);
 
-        when(userRepository.findById(id))
-                .thenReturn(Optional.empty());
+		assertNotNull(result);
+		assertEquals(0, result.size());
 
-        assertThrows(
-                UserNotFoundException.class,
-                () -> userService.deleteUser(id)
-        );
+		verify(userRepository, times(1)).findAllByRole(role);
+	}
 
-        verify(userRepository, times(1))
-                .findById(id);
+	// =========================================================
+	// getUsersByEmail()
+	// =========================================================
 
-        verify(userRepository, never())
-                .delete(any(User.class));
-    }
+	@Test
+	void getUserByEmail_ShouldReturnUser_WhenUserExists() {
+
+		String email = "chetan@gmail.com";
+
+		when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+		UserDto result = userService.getUserByEmail(email);
+
+		assertNotNull(result);
+		assertEquals(1L, result.getId());
+		assertEquals("Chetan", result.getFirstName());
+		assertEquals("Magar", result.getLastName());
+		assertEquals("chetan@gmail.com", result.getEmail());
+		assertEquals(Role.Owner, result.getRole());
+
+		verify(userRepository, times(1)).findByEmail(email);
+
+	}
+
+	@Test
+	void getUserByEmail_ShouldThrowException_WhenUserDoesNotExist() {
+
+		String email = "unknown@gmail.com";
+
+		when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+		assertThrows(UserNotFoundException.class, () -> userService.getUserByEmail(email));
+
+		verify(userRepository, times(1)).findByEmail(email);
+	}
+
+	// =========================================================
+	// deleteUser(Long id)
+	// =========================================================
+
+	@Test
+	void deleteUser_ShouldDeleteUser_WhenUserExists() {
+
+		Long id = 1L;
+
+		when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+		userService.deleteUser(id);
+
+		verify(userRepository, times(1)).findById(id);
+
+		verify(userRepository, times(1)).delete(user);
+	}
+
+	@Test
+	void deleteUser_ShouldThrowException_WhenUserDoesNotExist() {
+
+		Long id = 100L;
+
+		when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+		assertThrows(UserNotFoundException.class, () -> userService.deleteUser(id));
+
+		verify(userRepository, times(1)).findById(id);
+
+		verify(userRepository, never()).delete(any(User.class));
+	}
+
+	// =========================================================
+	// enableUser(Long id)
+	// =========================================================
+
+	@Test
+	void enableUser_ShouldEnableUserAndSendEmail_WhenUserExists() {
+
+		Long id = 1L;
+
+		when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+		user.setEnabled(false);
+
+		userService.enableUser(id);
+
+		assertEquals(true, user.isEnabled());
+
+		verify(userRepository, times(1)).findById(id);
+
+		verify(userEmailService, times(1)).sendAccountEnabledEmail(user.getEmail(), user.getFirstName());
+	}
+
+	@Test
+	void enableUser_ShouldThrowException_WhenUserDoesNotExist() {
+
+		Long id = 100L;
+
+		when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+		assertThrows(UserNotFoundException.class, () -> userService.enableUser(id));
+
+		verify(userRepository, times(1)).findById(id);
+
+		verifyNoInteractions(userEmailService);
+	}
+
+	// =========================================================
+	// disableUser(Long id)
+	// =========================================================
+
+	@Test
+	void disableUser_shouldDisableandSendEmail_whenUserExists() {
+		Long id = 1L;
+
+		when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+		user.setEnabled(true);
+
+		userService.disableUser(id);
+
+		assertEquals(false, user.isEnabled());
+
+		verify(userRepository, times(1)).findById(id);
+
+		verify(userEmailService, times(1)).sendAccountDisabledEmail(user.getEmail(), user.getFirstName());
+
+	}
+
+	@Test
+	void disableUser_shouldThrowException_whenUserNotExists() {
+		Long id = 2l;
+
+		when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+		assertThrows(UserNotFoundException.class, () -> userService.disableUser(id));
+
+		verify(userRepository, times(1)).findById(id);
+
+		verifyNoInteractions(userEmailService);
+
+	}
+
+	// =========================================================
+	// disableUser(Long id)
+	// =========================================================
+
+	@Test
+	void updateUser_ShouldUpdateUserSuccessfully() {
+
+		Long id = 1L;
+
+		UpdateUserRequest request = UpdateUserRequest.builder().firstName("Chetan Updated").lastName("Magar Updated")
+				.phone("9999999999").address("Mumbai").build();
+
+		when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+		when(userRepository.save(any(User.class))).thenReturn(user);
+
+		UserDto result = userService.updateUser(id, request);
+
+		assertNotNull(result);
+		assertEquals(1L, result.getId());
+		assertEquals("Chetan Updated", result.getFirstName());
+		assertEquals("Magar Updated", result.getLastName());
+		assertEquals("9999999999", result.getPhone());
+		assertEquals("Mumbai", result.getAddress());
+
+		// These should remain unchanged
+		assertEquals("chetan@gmail.com", result.getEmail());
+		assertEquals(Role.Owner, result.getRole());
+
+		verify(userRepository, times(1)).findById(id);
+		verify(userRepository, times(1)).save(any(User.class));
+
+		
+	}
+
+	@Test
+	void updateUser_ShouldThrowException_WhenUserDoesNotExist() {
+
+		Long id = 100L;
+
+		UpdateUserRequest request = UpdateUserRequest.builder().firstName("Chetan").lastName("Magar")
+				.phone("9999999999").address("Mumbai").build();
+
+		when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+		assertThrows(UserNotFoundException.class, () -> userService.updateUser(id, request));
+
+		verify(userRepository, times(1)).findById(id);
+
+		verify(userRepository, never()).save(any(User.class));
+
+		
+	}
+
 }
