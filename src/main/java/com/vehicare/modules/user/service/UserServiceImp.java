@@ -25,7 +25,7 @@ public class UserServiceImp implements UserService {
 	private final UserRepository userRepository;
 
 	private final PasswordEncoder passwordEncoder;
-	
+
 	private final UserEmailService userEmailservice;
 
 	private UserDto mapToUserDto(User user) {
@@ -49,6 +49,10 @@ public class UserServiceImp implements UserService {
 	@Transactional
 	public UserDto createUser(RegisterRequest request, Role role) {
 
+		if (role == null) {
+			throw new IllegalArgumentException("Role is required");
+		}
+
 		if (userRepository.existsByEmail(request.getEmail())) {
 			throw new EmailAlreadyExistsException("User already exists with email: " + request.getEmail());
 		}
@@ -58,8 +62,8 @@ public class UserServiceImp implements UserService {
 				.password(passwordEncoder.encode(request.getPassword())).role(role).build();
 
 		User savedUser = userRepository.save(user);
-		
-		userEmailservice.sendWelcomeEmail(savedUser.getEmail(), savedUser.getUsername(), savedUser.getRole());
+
+		userEmailservice.sendWelcomeEmail(savedUser.getEmail(), savedUser.getFirstName(), savedUser.getRole());
 
 		return mapToUserDto(savedUser);
 	}
@@ -71,16 +75,15 @@ public class UserServiceImp implements UserService {
 
 		return mapToUserDto(user);
 	}
-    
+
 	@Override
 	public UserDto getUserByEmail(String email) {
-		
+
 		User user = userRepository.findByEmail(email)
 				.orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
 
 		return mapToUserDto(user);
 	}
-	
 
 	@Override
 	public List<UserDto> getAllUsers() {
@@ -93,33 +96,39 @@ public class UserServiceImp implements UserService {
 
 		return userRepository.findAllByRole(role).stream().map(this::mapToUserDto).toList();
 	}
-	
+
 	@Override
 	@Transactional
-	public void enableUser(Long id)
-	{
+	public void enableUser(Long id) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+		if (user.isEnabled() == true) {
+			return;
+		}
+		user.setEnabled(true);
+
+		userEmailservice.sendAccountEnabledEmail(user.getEmail(), user.getFirstName());
+
+	}
+
+	@Override
+	@Transactional
+	public void disableUser(Long id) {
+		
 		User user = userRepository.findById(id)
 				.orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
 		
-		user.setEnabled(true);
 		
-		userEmailservice.sendAccountEnabledEmail(user.getEmail(), user.getUsername());
+		if (user.isEnabled() == false) {
+			return;
+		}
+		
+		user.setEnabled(false);
+		
+		userEmailservice.sendAccountDisabledEmail(user.getEmail(), user.getFirstName());
+		
+	}
 
-		
-	}
-	
-	@Override
-	@Transactional
-	public void disableUser(Long id)
-	{
-		User user = userRepository.findById(id)
-				.orElseThrow(()-> new UserNotFoundException("User not found with id: " + id));
-				
-				user.setEnabled(false);
-				userEmailservice.sendAccountDisabledEmail(user.getEmail(), user.getUsername());
-		
-	}
-	
 	@Override
 	@Transactional
 	public UserDto updateUser(Long id, UpdateUserRequest request) {
@@ -133,8 +142,6 @@ public class UserServiceImp implements UserService {
 		user.setAddress(request.getAddress());
 
 		User updatedUser = userRepository.save(user);
-		
-	
 
 		return mapToUserDto(updatedUser);
 	}
@@ -148,9 +155,5 @@ public class UserServiceImp implements UserService {
 
 		userRepository.delete(user);
 	}
-
-	
-	
-	
 
 }
