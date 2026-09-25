@@ -45,10 +45,10 @@ class InventoryServiceImplTest {
 	void setUp() {
 
 		part = Part.builder().id(1L).partNumber("BRK-001").name("Brake Pad").description("Front brake pad").quantity(10)
-				.unitPrice(1500.0).active(true).build();
+				.unitPrice(1500.0).active(true).minimumStockLevel(8).build();
 
 		request = PartRequest.builder().partNumber("BRK-001").name("Brake Pad").description("Front brake pad")
-				.quantity(10).unitPrice(1500.0).build();
+				.quantity(10).unitPrice(1500.0).minimumStockLevel(8) .build();
 	}
 
 	@Test
@@ -65,6 +65,7 @@ class InventoryServiceImplTest {
 		assertEquals(10, result.getQuantity());
 		assertEquals(1500.0, result.getUnitPrice());
 		assertTrue(result.isActive());
+		assertEquals(8, result.getMinimumStockLevel());
 
 		verify(partRepository).save(any(Part.class));
 
@@ -532,6 +533,7 @@ class InventoryServiceImplTest {
 	            .description("Updated description")
 	            .quantity(999)
 	            .unitPrice(2000.0)
+	            .minimumStockLevel(10)
 	            .build();
 
 	    PartDto result = inventoryService.updatePart(1L, updateRequest);
@@ -540,6 +542,7 @@ class InventoryServiceImplTest {
 	    assertEquals("Premium Brake Pad", result.getName());
 	    assertEquals("Updated description", result.getDescription());
 	    assertEquals(2000.0, result.getUnitPrice());
+	    assertEquals(10, result.getMinimumStockLevel());
 
 	    // Quantity must not be changed by updatePart()
 	    assertEquals(10, result.getQuantity());
