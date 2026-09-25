@@ -37,6 +37,7 @@ public class InventoryServiceImpl implements InventoryService {
 
 		Part part = Part.builder().partNumber(request.getPartNumber()).name(request.getName())
 				.description(request.getDescription()).quantity(request.getQuantity()).unitPrice(request.getUnitPrice())
+				.minimumStockLevel(request.getMinimumStockLevel())
 				.active(true).build();
 
 		Part savedPart = partRepository.save(part);
@@ -256,6 +257,7 @@ public class InventoryServiceImpl implements InventoryService {
 
 		return PartDto.builder().id(part.getId()).partNumber(part.getPartNumber()).name(part.getName())
 				.description(part.getDescription()).quantity(part.getQuantity()).unitPrice(part.getUnitPrice())
+				.minimumStockLevel(part.getMinimumStockLevel())
 				.active(part.isActive()).build();
 	}
 
@@ -273,6 +275,7 @@ public class InventoryServiceImpl implements InventoryService {
 		part.setName(request.getName());
 		part.setDescription(request.getDescription());
 		part.setUnitPrice(request.getUnitPrice());
+		part.setMinimumStockLevel(request.getMinimumStockLevel());
 
 		/*
 		 * can't update quantity here.

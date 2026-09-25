@@ -35,6 +35,9 @@ public class Part {
 
     @Column(nullable = false)
     private Integer quantity;
+    
+    @Column(nullable = false)
+    private Integer minimumStockLevel;
 
     @Column(nullable = false)
     private Double unitPrice;

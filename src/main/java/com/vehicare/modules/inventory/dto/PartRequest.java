@@ -24,6 +24,10 @@ public class PartRequest {
 	@NotNull(message = "Quantity is required")
 	@PositiveOrZero(message = "Quantity cannot be negative")
 	private Integer quantity;
+	
+	@NotNull(message = "Minimum stock level is required")
+	@PositiveOrZero(message = "Minimum stock level cannot be negative")
+	private Integer minimumStockLevel;
 
 	@NotNull(message = "Unit price is required")
 	@DecimalMin(value = "0.0", inclusive = false, message = "Unit price must be greater than zero")

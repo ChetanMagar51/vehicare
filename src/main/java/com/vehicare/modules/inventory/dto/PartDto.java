@@ -15,4 +15,5 @@ public class PartDto {
 	private Integer quantity;
 	private Double unitPrice;
 	private boolean active;
+	private Integer minimumStockLevel;
 }
